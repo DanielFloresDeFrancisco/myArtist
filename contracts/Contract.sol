@@ -49,21 +49,21 @@ contract Contract {
         verifiedMap[_nftId] = true;
     }
 
-    function auctionOffer(uint _nftId, uint _offer) public OnlySeller() {
+    function auctionOffer(uint _nftId, uint _offer) public OnlyBuyer() {
         nftPrice[_nftId] = _offer;
     }
 
-    function approveAuctionOffer(address _seller, uint _nftId) public OnlyBuyer() {
+    function approveAuctionOffer(address _seller, uint _nftId) public OnlySeller() {
         approvedAuction[_seller][_nftId] = true;
         delete nftPrice[_nftId]; // Pendiente
     }
 
-    function transferOwnership(uint _nftId, address _nftAdress, address _seller, address _buyer) payable public {
+    function transferOwnership(uint _nftId, address _nftAdress, address _seller, address _buyer) payable public OnlyBuyer {
         require(verifiedMap[_nftId] == true);
         require(approvedAuction[_seller][_nftId] == true);
         require(msg.value >= nftPrice[_nftId]);
 
-        (bool success, ) = payable(seller).call{value: msg.value}(
+        (bool success, ) = payable(_seller).call{value: msg.value}(
             ""
         );
         require(success);
